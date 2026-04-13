@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stayhere AR Draw</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: sans-serif; }
+        #camera-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+        #overlay-img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; pointer-events: none; opacity: 0.5; width: 80%; }
+        
+        .controls { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            z-index: 10; background: rgba(0,0,0,0.7); padding: 15px; border-radius: 15px;
+            width: 85%; color: white; display: flex; flex-direction: column; gap: 10px;
+        }
+        input[type="range"] { width: 100%; }
+        .btn-row { display: flex; justify-content: space-between; }
+        button { padding: 8px 15px; border-radius: 5px; border: none; background: #007AFF; color: white; }
+    </style>
+</head>
+<body>
+
+<video id="camera-view" autoplay playsinline></video>
+<img id="overlay-img" src="" style="display:none;">
+
+<div class="controls">
+    <div class="btn-row">
+        <input type="file" id="file-input" accept="image/*" style="display:none;">
+        <button onclick="document.getElementById('file-input').click()">選取相片</button>
+        <button onclick="location.reload()">重置</button>
+    </div>
+    
+    <label>透明度 (Opacity)</label>
+    <input type="range" id="opacity-slider" min="0" max="1" step="0.01" value="0.5">
+    
+    <label>大小 (Size)</label>
+    <input type="range" id="size-slider" min="10" max="200" step="1" value="80">
+</div>
+
+<script>
+    const video = document.getElementById('camera-view');
+    const img = document.getElementById('overlay-img');
+    const fileInput = document.getElementById('file-input');
+    const opacitySlider = document.getElementById('opacity-slider');
+    const sizeSlider = document.getElementById('size-slider');
+
+    // 啟動鏡頭 (後置鏡頭)
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => alert("請允許開啟鏡頭以進行描畫"));
+
+    // 處理上傳圖片
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            img.src = URL.createObjectURL(file);
+            img.style.display = 'block';
+        }
+    };
+
+    // 監聽拉條
+    opacitySlider.oninput = () => { img.style.opacity = opacitySlider.value; };
+    sizeSlider.oninput = () => { img.style.width = sizeSlider.value + '%'; };
+</script>
+
+</body>
+</html>
